@@ -1,17 +1,21 @@
 
 import re
+import os
 import csv
+from tqdm import tqdm
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 # +=
-data1 = list(csv.reader(open("reviews.csv")))
-data2 = list(csv.reader(open("cleaned.csv")))
-data3 = list(csv.reader(open("tweets-02.csv", encoding="latin-1")))[1:]
-data3 = [[i[-1]]+[i[0]] for i in data3]
-data = data3
+
+files = [i for i in os.listdir("data-01") if i not in ["filter.py", "reviews"]]
+data = []
+for file in tqdm(files):
+    file_data = list(csv.reader(open("data-01/"+file)))
+    for f in tqdm(file_data):
+        data.append(f)
 
 class SentimentClassifier:
     def __init__(self, data=data):
@@ -20,7 +24,7 @@ class SentimentClassifier:
         self.data_text = [" ".join(row[:-1]) for row in self.data]
 
         positive_threshold = 3
-        negative_threshold = 1
+        negative_threshold = 2
 
         try:
             self.data_labels = [
