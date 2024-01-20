@@ -10,31 +10,19 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 
 # +=
 
-files = [i for i in os.listdir("data-01") if i not in ["filter.py", "reviews"]]
-data = []
-for file in tqdm(files):
-    file_data = list(csv.reader(open("data-01/"+file)))
-    for f in tqdm(file_data):
-        data.append(f)
+data1 = list(csv.reader(open("data/finance-sentiment.csv")))
+data2 = list(csv.reader(open("data/reviews-sentiment.csv")))
+data3 = list(csv.reader(open("data/movie-sentiment.csv")))
+data4 = list(csv.reader(open("data/product-sentiment.csv")))
+
+data = data4
 
 class SentimentClassifier:
     def __init__(self, data=data):
         self.data = data
         self.alpha = 1
         self.data_text = [" ".join(row[:-1]) for row in self.data]
-
-        positive_threshold = 3
-        negative_threshold = 2
-
-        try:
-            self.data_labels = [
-                "positive" if int(row[-1]) >= positive_threshold else \
-                "negative" if int(row[-1]) <= negative_threshold else \
-                "neutral" for row in self.data
-            ]
-
-        except ValueError:
-            self.data_labels = [row[-1].lower() for row in self.data]
+        self.data_labels = [row[-1] for row in self.data]
 
         self.X_train, self.X_test, self.Y_train, self.Y_test = None, None, None, None
         self.vectorizer = None
@@ -47,8 +35,7 @@ class SentimentClassifier:
         # split data into training and testing set
         self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(
             self.data_text,
-            self.data_labels,
-            random_state=42
+            self.data_labels
         )
 
         self.vectorizer = CountVectorizer()
@@ -56,10 +43,7 @@ class SentimentClassifier:
         self.X_test = self.vectorizer.transform(self.X_test)
 
         # initialize a model
-        self.model = MultinomialNB(
-            alpha = self.alpha
-        )
-
+        self.model = MultinomialNB()
         self.model.fit(self.X_train, self.Y_train)
 
         # make a predictions with testing set

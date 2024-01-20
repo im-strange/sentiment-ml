@@ -1,47 +1,27 @@
 
 import csv
-import statkit as sk
+import os
 from tqdm import tqdm
 
-def filter(file):
-    data = list(csv.reader(open(file, encoding="latin-1")))[1:]
-    data = [[sublist[-1]] + [sublist[0]] for sublist in tqdm(data)]
-    return data
+files = [i for i in os.listdir() if i not in ["filter.py", "reviews-06.csv"]]
+data = []
+for file in tqdm(files):
+    x = list(csv.reader(open(file)))[1:]
+    for i in x:
+        data.append(i)
 
-def write_csv(file, data):
-    with open(file, "w") as data_file:
-        writer = csv.writer(data_file)
-        writer.writerows(data)
-    print(f"done saving {file}")
+pos = [i for i in data if int(i[-1]) >= 4]
+neg = [i for i in data if int(i[-1]) <= 2]
+neu = [i for i in data if int(i[-1]) == 3]
 
+shortest = len(min(pos, neg, neu))
 
-data = list(csv.reader(open("tweets-02.csv", encoding="latin-1")))
-chunk = 150000
+pos = pos[:shortest]
+neg = neg[:shortest]
+neu = neu[:shortest]
 
-ctr = 1
+data = pos + neg + neu
 
-for i in tqdm(range(0, len(data), chunk)):
-    filename = f"data-0{ctr}.csv"
-    write_csv(filename, data[i:i+chunk])
-    print(f"done writing -> {filename}")
-    ctr += 1
-
-"""
-pos = 4
-neg = 2
-
-new = []
-
-for i in tqdm(data):
-    label = ""
-    if int(i[-1]) >= pos:
-        label = "positive"
-    elif int(i[-1]) <= neg:
-        label = "negative"
-    else:
-        label = "neutral"
-
-    new.append(i[:-1]+[label])
-
-write_csv("cleaned.csv", new)
-"""
+with open("main.csv", "w") as file:
+    writer = csv.writer(file)
+    writer.writerows(data)

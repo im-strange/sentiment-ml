@@ -3,6 +3,7 @@ import pickle
 
 # load the model
 with open("model.pickle", "rb") as file:
+    print(f"[+] loading model..")
     classifier = pickle.load(file)
     vectorizer = pickle.load(file)
 
@@ -18,12 +19,15 @@ sample_tweets = [
     "Wow it is so cool",
     "this stuff is boring",
     "This will make you rich",
-    "I don't care"
+    "I don't care",
+    "this is fascinating",
+    "this world is dumb",
+    "you are dumb"
 ]
 
 # report
 predictions = classifier.predict(sample_tweets)
-results = zip(sample_tweets, predictions)
+results = list(zip(sample_tweets, predictions))
 
 def wrap(input_str, max_length=20):
     if len(input_str) <= max_length:
@@ -35,6 +39,11 @@ print("[Model Report]")
 print(classifier.report)
 
 print("[Model predictions]")
-for index, result in enumerate(results, start=1):
-    print(f"{'':<5}{index:<{len(str(len(predictions)))+2}} {wrap(result[0]):<25}{result[1]}")
+for text, result in results:
+    y = 25 if int(result[0]) not in [1,0] else 26
+    x = 12 if int(result[0]) not in [1,0] else 11
+    wrapped = wrap(text)
+    predicted_class = result[0]
+    class_prob = list(map((lambda x: round(x, 3)),result[1]))
 
+    print(f"{'':<3}{wrapped:<{y}}{predicted_class:<{x}}{class_prob}")
